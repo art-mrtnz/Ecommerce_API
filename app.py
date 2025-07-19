@@ -163,6 +163,10 @@ orders_schema = OrderSchema(many=True)
 # HELPER FUNCTIONS
 # ================================
 
+def get_current_user_id():
+    """Get current user ID from JWT token and convert to integer"""
+    return int(get_jwt_identity())
+
 def paginate_query(query, page, per_page, error_out=False):
     """Paginate a SQLAlchemy query"""
     items = query.paginate(
@@ -256,7 +260,7 @@ def register():
         db.session.commit()
         
         # Create access token
-        access_token = create_access_token(identity=new_user.id)
+        access_token = create_access_token(identity=str(new_user.id))
         
         return jsonify({
             'message': 'User registered successfully',
@@ -279,7 +283,7 @@ def login():
         user = User.query.filter_by(email=data['email']).first()
         
         if user and user.check_password(data['password']):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
             return jsonify({
                 'message': 'Login successful',
                 'access_token': access_token,
@@ -297,7 +301,7 @@ def login():
 @app.route('/auth/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
-    current_user_id = get_jwt_identity()
+    current_user_id = get_current_user_id()
     user = User.query.get_or_404(current_user_id)
     return user_schema.jsonify(user)
 
@@ -373,7 +377,7 @@ def get_user(user_id):
 @jwt_required()
 def update_user(user_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         user = User.query.get_or_404(user_id)
         
         # Users can only update their own profile
@@ -408,7 +412,7 @@ def update_user(user_id):
 @jwt_required()
 def delete_user(user_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         user = User.query.get_or_404(user_id)
         
         # Users can only delete their own profile
@@ -532,7 +536,7 @@ def delete_product(product_id):
 @jwt_required()
 def create_order():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         data = request.get_json()
         
         # Create new order
@@ -597,7 +601,7 @@ def get_orders():
 @app.route('/orders/<int:order_id>', methods=['GET'])
 @jwt_required()
 def get_order(order_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = get_current_user_id()
     order = Order.query.get_or_404(order_id)
     
     # Users can only view their own orders
@@ -611,7 +615,7 @@ def get_order(order_id):
 @jwt_required()
 def update_order_status(order_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         order = Order.query.get_or_404(order_id)
         
         # Users can only update their own orders
@@ -644,7 +648,7 @@ def update_order_status(order_id):
 @jwt_required()
 def cancel_order(order_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         order = Order.query.get_or_404(order_id)
         
         # Users can only cancel their own orders
@@ -697,7 +701,7 @@ def get_orders_by_status(status):
 @app.route('/orders/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user_orders(user_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = get_current_user_id()
     
     # Users can only view their own orders
     if current_user_id != user_id:
@@ -731,7 +735,7 @@ def get_user_orders(user_id):
 @app.route('/orders/<int:order_id>/products', methods=['GET'])
 @jwt_required()
 def get_order_products(order_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = get_current_user_id()
     order = Order.query.get_or_404(order_id)
     
     # Users can only view products of their own orders
@@ -745,7 +749,7 @@ def get_order_products(order_id):
 @jwt_required()
 def add_product_to_order(order_id, product_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         order = Order.query.get_or_404(order_id)
         product = Product.query.get_or_404(product_id)
         
@@ -776,7 +780,7 @@ def add_product_to_order(order_id, product_id):
 @jwt_required()
 def remove_product_from_order(order_id, product_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         order = Order.query.get_or_404(order_id)
         product = Product.query.get_or_404(product_id)
         
@@ -805,7 +809,7 @@ def remove_product_from_order(order_id, product_id):
 @jwt_required()
 def delete_order(order_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = get_current_user_id()
         order = Order.query.get_or_404(order_id)
         
         # Users can only delete their own orders

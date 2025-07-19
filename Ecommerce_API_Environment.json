@@ -1,0 +1,19 @@
+{
+	"id": "ecommerce-api-environment",
+	"name": "E-commerce API Environment",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5001",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+}
